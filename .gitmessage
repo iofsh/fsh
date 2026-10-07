@@ -1,0 +1,12 @@
+# Format: folder_name: note
+#
+# Examples:
+#   root: initial commit
+#   app: add process list screen
+#   service: implement logd socket client
+#   shared: add ProcessInfo model
+#   native: wire libghostty JNI bridge
+#   .github: add build workflow
+#   docs: document Shizuku setup
+#
+# Subject under 72 chars. Blank line before body.
