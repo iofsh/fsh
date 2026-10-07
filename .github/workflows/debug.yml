@@ -34,9 +34,13 @@ jobs:
 
       - name: Set up Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager --install "ndk;27.1.12297006" "platforms;android-35" "build-tools;35.0.0" > /dev/null
+           SDKMANAGER=$(find $ANDROID_SDK_ROOT/cmdline-tools -name sdkmanager -type f | head -1)
+           echo "Using: $SDKMANAGER"
+           echo "$(dirname $SDKMANAGER)" >> $GITHUB_PATH
+           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+           export PATH="$(dirname $SDKMANAGER):$PATH"
+           yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
+           $SDKMANAGER --install "ndk;27.1.12297006" "platforms;android-35" "build-tools;35.0.0" > /dev/null
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
