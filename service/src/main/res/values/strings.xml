@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_label">Fsh Service</string>
+    <string name="service_description">Provides process, log, and system metric access via Shizuku.</string>
+</resources>
