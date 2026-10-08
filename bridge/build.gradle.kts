@@ -3,6 +3,9 @@ plugins {
 }
 
 android {
+  buildFeatures {
+    buildConfig = true
+}
     namespace = "io.fsh.bridge"
     compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndk.get()
