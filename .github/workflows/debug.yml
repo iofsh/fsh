@@ -44,6 +44,16 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,x86_64-linux-android
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -53,4 +63,12 @@ jobs:
             --no-daemon \
             --no-parallel \
             --no-configuration-cache \
-            --max-workers=1 2>&1 | grep -E "What went wrong|FAILED|^> Task|error:|ERROR|Caused by|\* Try|BUILD" | head -80
+            --max-workers=1
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: fsh-debug-${{ github.sha }}
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
+          retention-days: 14
