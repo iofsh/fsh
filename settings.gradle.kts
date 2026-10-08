@@ -19,4 +19,4 @@ rootProject.name = "Fsh"
 include(":app")
 include(":service")
 include(":shared")
-include(":native")
+include(":bridge")

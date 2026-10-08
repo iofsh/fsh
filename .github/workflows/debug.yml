@@ -68,7 +68,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/zig
-          key: zig-${{ runner.os }}-${{ hashFiles('native/ghostty/build.zig.zon') }}
+          key: zig-${{ runner.os }}-${{ hashFiles('bridge/ghostty/build.zig.zon') }}
           restore-keys: zig-${{ runner.os }}-
 
       - name: Cache Cargo
@@ -77,8 +77,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            native/sys/target
-          key: cargo-${{ runner.os }}-${{ hashFiles('native/sys/Cargo.toml', 'native/sys/Cargo.lock') }}
+            bridge/sys/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('bridge/sys/Cargo.toml', 'bridge/sys/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
 
       - name: Grant execute permission for gradlew

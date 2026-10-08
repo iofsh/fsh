@@ -22,9 +22,9 @@ captures/
 .vscode/
 
 # Native
-native/ghostty/zig-out/
-native/ghostty/zig-cache/
-native/sys/target/
+bridge/ghostty/zig-out/
+bridge/ghostty/zig-cache/
+bridge/sys/target/
 
 # OS
 .DS_Store
