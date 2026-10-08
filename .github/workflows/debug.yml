@@ -104,7 +104,7 @@ jobs:
           grep "FAILED" build.log || echo "(no FAILED lines)"
           echo ""
           echo "=== errors ==="
-          grep -E "^ERROR|error:|Caused by" build.log | head -20 || echo "(no error lines)"
+          grep -E "^e: |^w: .*warning|^ERROR|error:|Caused by" build.log | head -40 || echo "(no error lines)"
           echo ""
           echo "=== last 80 lines ==="
           tail -80 build.log
