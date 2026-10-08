@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Fsh contributors
 
-package io.fsh.service.binder.package
+package io.fsh.service.binder.packages
 
 import android.content.Context
 
