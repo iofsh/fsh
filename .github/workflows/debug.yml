@@ -114,7 +114,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v7
         with:
-          name: fsh-debug-${{ github.sha }}
+          name: app-debug
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
@@ -123,7 +123,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log-${{ github.sha }}
+          name: build-log
           path: build.log
           if-no-files-found: ignore
           retention-days: 7
@@ -132,7 +132,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports-${{ github.sha }}
+          name: test-reports
           path: |
             **/build/reports/tests/**
             **/build/test-results/**
