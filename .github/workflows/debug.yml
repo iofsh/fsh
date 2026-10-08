@@ -84,7 +84,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon --no-configuration-cache --max-workers=2
+        run: ./gradlew :app:assembleDebug --no-daemon --no-parallel --no-configuration-cache --max-workers=2
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
