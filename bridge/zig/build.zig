@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) void {
 
     const lib = b.addLibrary(.{
         .name = "fsh_bridge",
-        .linkage = .dynamic,
+        .linkage = .static,
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/bridge.zig"),
             .target = target,
@@ -14,9 +14,7 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    lib.root_module.linkSystemLibrary("log", .{});
     lib.root_module.link_libc = true;
-
     b.installArtifact(lib);
 
     const tests = b.addTest(.{
