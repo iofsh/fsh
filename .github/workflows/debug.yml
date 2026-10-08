@@ -34,21 +34,20 @@ jobs:
 
       - name: Set up Android SDK
         run: |
-           SDKMANAGER=$(find $ANDROID_SDK_ROOT/cmdline-tools -name sdkmanager -type f | head -1)
-           echo "Using: $SDKMANAGER"
-           echo "$(dirname $SDKMANAGER)" >> $GITHUB_PATH
-           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-           export PATH="$(dirname $SDKMANAGER):$PATH"
-           yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
-           $SDKMANAGER --install "ndk;27.1.12297006" "platforms;android-35" "build-tools;35.0.0" > /dev/null
+          SDKMANAGER=$(find $ANDROID_SDK_ROOT/cmdline-tools -name sdkmanager -type f | head -1)
+          echo "$(dirname $SDKMANAGER)" >> $GITHUB_PATH
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          export PATH="$(dirname $SDKMANAGER):$PATH"
+          yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
+          $SDKMANAGER --install "ndk;27.1.12297006" "platforms;android-35" "build-tools;35.0.0" > /dev/null
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Set up Zig
-        uses: mlugg/setup-zig@v1
+        uses: mlugg/setup-zig@v2
         with:
-          version: 0.13.0
+          version: 0.16.0
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -56,7 +55,7 @@ jobs:
           targets: aarch64-linux-android,x86_64-linux-android
 
       - name: Cache Gradle
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.gradle/caches
@@ -65,14 +64,14 @@ jobs:
           restore-keys: gradle-${{ runner.os }}-
 
       - name: Cache Zig
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/zig
-          key: zig-${{ runner.os }}-${{ hashFiles('bridge/ghostty/build.zig.zon') }}
+          key: zig-${{ runner.os }}-${{ hashFiles('bridge/build.zig.zon') }}
           restore-keys: zig-${{ runner.os }}-
 
       - name: Cache Cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -97,7 +96,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: test-reports-${{ github.sha }}
           path: |
