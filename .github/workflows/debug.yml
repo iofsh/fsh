@@ -84,15 +84,44 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon --no-parallel --no-configuration-cache --max-workers=2
+        id: build
+        continue-on-error: true
+        run: |
+          ./gradlew :app:assembleDebug \
+            --no-daemon \
+            --no-parallel \
+            --no-configuration-cache \
+            --max-workers=1 \
+            --stacktrace 2>&1 | tee build.log
+
+      - name: Show failure
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "=== what went wrong ==="
+          grep -B2 -A25 "What went wrong" build.log || echo "(no 'What went wrong' section)"
+          echo "=== failed tasks ==="
+          grep "FAILED" build.log || echo "(no FAILED lines)"
+          echo "=== last 80 lines ==="
+          tail -80 build.log
+          exit 1
 
       - name: Upload APK
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
           name: fsh-debug-${{ github.sha }}
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload test reports
         if: always()
