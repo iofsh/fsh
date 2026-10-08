@@ -5,6 +5,9 @@ plugins {
 }
 
 android {
+  buildFeatures {
+    buildConfig = true
+}
     namespace = "io.fsh.service"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
