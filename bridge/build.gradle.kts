@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "io.fsh.native"
+    namespace = "io.fsh.bridge"
     compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndk.get()
 
