@@ -5,10 +5,15 @@ package io.fsh.service.metrics
 
 import android.content.Context
 import io.fsh.service.metrics.battery.BatteryCollector
+import io.fsh.service.metrics.battery.BatteryCollectorSnapshot
 import io.fsh.service.metrics.cpu.CpuCollector
+import io.fsh.service.metrics.cpu.CpuSnapshot
 import io.fsh.service.metrics.mem.MemCollector
+import io.fsh.service.metrics.mem.MemSnapshot
 import io.fsh.service.metrics.net.NetCollector
+import io.fsh.service.metrics.net.NetSnapshot
 import io.fsh.service.metrics.thermal.ThermalCollector
+import io.fsh.service.metrics.thermal.ThermalSnapshot
 
 class MetricsService(context: Context) {
 
@@ -32,5 +37,5 @@ data class MetricsSnapshot(
     val mem: MemSnapshot,
     val net: NetSnapshot,
     val thermal: ThermalSnapshot,
-    val battery: BatterySnapshot,
+    val battery: BatteryCollectorSnapshot,
 )
