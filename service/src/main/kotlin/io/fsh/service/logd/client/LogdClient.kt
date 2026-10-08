@@ -3,7 +3,7 @@
 
 package io.fsh.service.logd.client
 
-import io.fsh.service.aidl.LogEntry
+import io.fsh.shared.model.log.LogEntry
 import io.fsh.service.logd.parser.EntryParser
 import io.fsh.service.logd.socket.LogdrSocket
 import kotlin.concurrent.thread

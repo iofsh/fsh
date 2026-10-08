@@ -3,7 +3,7 @@
 
 package io.fsh.service.logd.filter
 
-import io.fsh.service.aidl.LogEntry
+import io.fsh.shared.model.log.LogEntry
 
 data class LogFilter(
     val minPriority: Int = 0,

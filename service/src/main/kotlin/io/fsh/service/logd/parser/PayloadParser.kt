@@ -3,7 +3,7 @@
 
 package io.fsh.service.logd.parser
 
-import io.fsh.service.aidl.LogEntry
+import io.fsh.shared.model.log.LogEntry
 
 class PayloadParser {
 

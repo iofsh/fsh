@@ -6,7 +6,7 @@ package io.fsh.service.backend.shizuku
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
-import io.fsh.service.aidl.IPrivilegedService
+import io.fsh.service.IPrivilegedService
 import rikka.shizuku.Shizuku
 
 class ShizukuUserService {

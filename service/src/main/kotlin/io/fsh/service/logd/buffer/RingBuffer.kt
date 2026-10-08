@@ -3,7 +3,7 @@
 
 package io.fsh.service.logd.buffer
 
-import io.fsh.service.aidl.LogEntry
+import io.fsh.shared.model.log.LogEntry
 
 class RingBuffer(private val capacity: Int) {
 

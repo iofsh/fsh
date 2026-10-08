@@ -3,7 +3,7 @@
 
 package io.fsh.service.session
 
-import io.fsh.service.aidl.ISessionService
+import io.fsh.service.ISessionService
 import io.fsh.service.pty.PtyService
 
 class SessionServiceImpl : ISessionService.Stub() {

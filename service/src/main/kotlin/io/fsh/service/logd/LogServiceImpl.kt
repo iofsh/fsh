@@ -3,8 +3,8 @@
 
 package io.fsh.service.logd
 
-import io.fsh.service.aidl.ILogService
-import io.fsh.service.aidl.LogEntry
+import io.fsh.service.ILogService
+import io.fsh.shared.model.log.LogEntry
 import io.fsh.service.logd.buffer.RingBuffer
 import io.fsh.service.logd.client.LogdClient
 

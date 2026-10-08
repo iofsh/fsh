@@ -6,10 +6,10 @@ package io.fsh.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import io.fsh.service.aidl.ILogService
-import io.fsh.service.aidl.IPrivilegedService
-import io.fsh.service.aidl.IProcessService
-import io.fsh.service.aidl.ISessionService
+import io.fsh.service.ILogService
+import io.fsh.service.IPrivilegedService
+import io.fsh.service.IProcessService
+import io.fsh.service.ISessionService
 import io.fsh.service.logd.LogServiceImpl
 import io.fsh.service.proc.ProcessServiceImpl
 import io.fsh.service.session.SessionServiceImpl

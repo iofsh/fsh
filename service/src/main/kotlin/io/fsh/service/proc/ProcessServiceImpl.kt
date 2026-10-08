@@ -3,8 +3,8 @@
 
 package io.fsh.service.proc
 
-import io.fsh.service.aidl.IProcessService
-import io.fsh.service.aidl.ProcessInfo
+import io.fsh.service.IProcessService
+import io.fsh.shared.model.process.ProcessInfo
 import io.fsh.service.proc.parser.StatParser
 import io.fsh.service.proc.parser.StatusParser
 import io.fsh.service.proc.reader.ProcReader
