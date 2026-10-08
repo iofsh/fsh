@@ -26,98 +26,51 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '21'
+      - name: Set up Java
+        uses: ./.github/actions/setup-java
 
-      - name: Set up Android SDK
-        run: |
-          SDKMANAGER=$(find $ANDROID_SDK_ROOT/cmdline-tools -name sdkmanager -type f | head -1)
-          echo "$(dirname $SDKMANAGER)" >> $GITHUB_PATH
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          export PATH="$(dirname $SDKMANAGER):$PATH"
-          yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
-          $SDKMANAGER --install "ndk;27.1.12297006" "platforms;android-35" "build-tools;35.0.0" > /dev/null
+      - name: Set up Android
+        uses: ./.github/actions/setup-android
+
+      - name: Set up NDK
+        uses: ./.github/actions/setup-ndk
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: ./.github/actions/setup-gradle
 
       - name: Set up Zig
-        uses: mlugg/setup-zig@v2
-        with:
-          version: 0.16.0
+        uses: ./.github/actions/setup-zig
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,x86_64-linux-android
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', 'gradle/libs.versions.toml') }}
-          restore-keys: gradle-${{ runner.os }}-
+        uses: ./.github/actions/setup-rust
 
       - name: Cache Zig
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/zig
-          key: zig-${{ runner.os }}-${{ hashFiles('bridge/build.zig.zon') }}
-          restore-keys: zig-${{ runner.os }}-
+        uses: ./.github/actions/cache-zig
 
       - name: Cache Cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            bridge/sys/target
-          key: cargo-${{ runner.os }}-${{ hashFiles('bridge/sys/Cargo.toml', 'bridge/sys/Cargo.lock') }}
-          restore-keys: cargo-${{ runner.os }}-
+        uses: ./.github/actions/cache-cargo
+
+      - name: Check for empty files
+        uses: ./.github/actions/check-empty-files
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build debug APK
-        id: build
-        shell: bash -o pipefail {0}
-        run: |
-          ./gradlew :app:assembleDebug \
-            --no-daemon \
-            --no-parallel \
-            --no-configuration-cache \
-            --max-workers=1 \
-            --stacktrace 2>&1 | tee build.log
+        uses: ./.github/actions/gradle-build
+        with:
+          task: ':app:assembleDebug'
+          log-file: build.log
 
       - name: Show failure
         if: failure()
-        run: |
-          echo "=== what went wrong ==="
-          grep -B2 -A25 "What went wrong" build.log || echo "(no 'What went wrong' section)"
-          echo ""
-          echo "=== failed tasks ==="
-          grep "FAILED" build.log || echo "(no FAILED lines)"
-          echo ""
-          echo "=== errors ==="
-          grep -E "^e: |^w: .*warning|^ERROR|error:|Caused by" build.log | head -40 || echo "(no error lines)"
-          echo ""
-          echo "=== last 80 lines ==="
-          tail -80 build.log
-          exit 1
+        uses: ./.github/actions/show-failure
+        with:
+          log-file: build.log
 
       - name: Upload APK
         if: success()
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 14
+        uses: ./.github/actions/upload-apk
 
       - name: Upload build log
         if: always()

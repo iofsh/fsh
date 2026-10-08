@@ -1,0 +1,21 @@
+name: Setup NDK
+description: Install Android NDK
+
+inputs:
+  ndk-version:
+    description: NDK version
+    required: false
+    default: '27.1.12297006'
+
+runs:
+  using: composite
+  steps:
+    - name: Install NDK
+      shell: bash
+      run: |
+        SDKMANAGER=$(find $ANDROID_SDK_ROOT/cmdline-tools -name sdkmanager -type f | head -1)
+        export PATH="$(dirname $SDKMANAGER):$PATH"
+        yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
+        $SDKMANAGER --install "ndk;${{ inputs.ndk-version }}" > /dev/null
+        echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/${{ inputs.ndk-version }}" >> $GITHUB_ENV
+        echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/${{ inputs.ndk-version }}" >> $GITHUB_ENV
