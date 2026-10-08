@@ -1,0 +1,12 @@
+.{
+    .name = .fsh_bridge,
+    .version = "0.1.0",
+    .minimum_zig_version = "0.16.0",
+    .fingerprint = 0x8f2a1c4e6b9d3a7f,
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
