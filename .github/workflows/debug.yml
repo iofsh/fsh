@@ -1,3 +1,4 @@
+
 name: Debug
 
 on:
@@ -40,7 +41,6 @@ jobs:
           export PATH="$(dirname $SDKMANAGER):$PATH"
           yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
           $SDKMANAGER --install "ndk;27.1.12297006" "platforms;android-35" "build-tools;35.0.0" > /dev/null
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -54,21 +54,80 @@ jobs:
         with:
           targets: aarch64-linux-android,x86_64-linux-android
 
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Cache Zig
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/zig
+          key: zig-${{ runner.os }}-${{ hashFiles('bridge/build.zig.zon') }}
+          restore-keys: zig-${{ runner.os }}-
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            bridge/sys/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('bridge/sys/Cargo.toml', 'bridge/sys/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build debug APK
+        id: build
+        continue-on-error: true
         run: |
           ./gradlew :app:assembleDebug \
             --no-daemon \
             --no-parallel \
             --no-configuration-cache \
-            --max-workers=1
-
+            --max-workers=1 \
+            --stacktrace 2>&1 | tee build.log
+      - name: Show failure
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "=== what went wrong ==="
+          grep -B2 -A25 "What went wrong" build.log || echo "(no 'What went wrong' section)"
+          echo "=== failed tasks ==="
+          grep "FAILED" build.log || echo "(no FAILED lines)"
+          echo "=== last 80 lines ==="
+          tail -80 build.log
+          exit 1
       - name: Upload APK
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
           name: fsh-debug-${{ github.sha }}
           path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ github.sha }}
+          path: |
+            **/build/reports/tests/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 7
