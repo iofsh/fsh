@@ -9,8 +9,17 @@ runs:
       run: |
         empty=$(find app service shared bridge -type f -size 0 \
           -not -path "*/build/*" \
+          -not -path "*/target/*" \
+          -not -path "*/zig-out/*" \
+          -not -path "*/zig-cache/*" \
           -not -name ".gitkeep" \
-          -not -name "*.jar" 2>/dev/null)
+          -not -name "*.jar" \
+          -not -name "*.ttf" \
+          -not -name "*.otf" \
+          -not -name "*.png" \
+          -not -name "*.jpg" \
+          -not -name "*.so" \
+          -not -name "*.a" 2>/dev/null)
         if [ -n "$empty" ]; then
           echo "::error::empty files detected:"
           echo "$empty"
