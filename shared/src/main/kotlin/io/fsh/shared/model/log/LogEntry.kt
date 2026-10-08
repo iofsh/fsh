@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Fsh contributors
 
-package io.fsh.service.aidl
+package io.fsh.shared.model.log
 
 import android.os.Parcel
 import android.os.Parcelable
