@@ -1,0 +1,28 @@
+name: Show Failure
+description: Extract errors from build.log for compact CI output
+
+inputs:
+  log-file:
+    description: Path to build log
+    required: false
+    default: 'build.log'
+
+runs:
+  using: composite
+  steps:
+    - name: Show failure
+      shell: bash
+      run: |
+        LOG="${{ inputs.log-file }}"
+        echo "=== what went wrong ==="
+        grep -B2 -A25 "What went wrong" "$LOG" || echo "(no 'What went wrong' section)"
+        echo ""
+        echo "=== failed tasks ==="
+        grep "FAILED" "$LOG" || echo "(no FAILED lines)"
+        echo ""
+        echo "=== errors ==="
+        grep -E "^e: |^w: |^ERROR|error:|Caused by" "$LOG" | head -40 || echo "(no error lines)"
+        echo ""
+        echo "=== last 80 lines ==="
+        tail -80 "$LOG"
+        exit 1

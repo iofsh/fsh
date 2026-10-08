@@ -1,0 +1,36 @@
+name: Upload APK
+description: Upload built APK as artifact
+
+inputs:
+  name:
+    description: Artifact name
+    required: false
+    default: 'app-debug'
+  path:
+    description: APK path glob
+    required: false
+    default: 'app/build/outputs/apk/debug/*.apk'
+  retention-days:
+    description: Artifact retention in days
+    required: false
+    default: '14'
+
+outputs:
+  artifact-id:
+    description: Uploaded artifact ID
+    value: ${{ steps.upload.outputs.artifact-id }}
+  artifact-url:
+    description: Uploaded artifact URL
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Upload APK
+      id: upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        if-no-files-found: error
+        retention-days: ${{ fromJSON(inputs.retention-days) }}

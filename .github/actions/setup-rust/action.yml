@@ -1,0 +1,16 @@
+name: Setup Rust
+description: Install Rust with Android targets
+
+inputs:
+  targets:
+    description: Comma-separated Rust targets
+    required: false
+    default: 'aarch64-linux-android,x86_64-linux-android'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ inputs.targets }}

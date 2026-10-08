@@ -1,0 +1,15 @@
+name: Cache Cargo
+description: Cache Rust dependencies and build artifacts
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          bridge/sys/target
+        key: cargo-${{ runner.os }}-${{ hashFiles('bridge/sys/Cargo.toml', 'bridge/sys/Cargo.lock') }}
+        restore-keys: cargo-${{ runner.os }}-

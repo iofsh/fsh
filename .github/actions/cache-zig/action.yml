@@ -1,0 +1,14 @@
+name: Cache Zig
+description: Cache Zig compiler and packages
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Zig
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/zig
+          ~/.zig-cache
+        key: zig-${{ runner.os }}-${{ hashFiles('bridge/build.zig.zon') }}
+        restore-keys: zig-${{ runner.os }}-

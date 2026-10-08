@@ -1,0 +1,19 @@
+name: Check Empty Files
+description: Fail if any tracked source file is 0 bytes
+
+runs:
+  using: composite
+  steps:
+    - name: Check for empty files
+      shell: bash
+      run: |
+        empty=$(find app service shared bridge -type f -size 0 \
+          -not -path "*/build/*" \
+          -not -name ".gitkeep" \
+          -not -name "*.jar" 2>/dev/null)
+        if [ -n "$empty" ]; then
+          echo "::error::empty files detected:"
+          echo "$empty"
+          exit 1
+        fi
+        echo "no empty source files"

@@ -1,0 +1,17 @@
+name: Setup Gradle
+description: Install Gradle with caching
+
+inputs:
+  cache-read-only:
+    description: Read-only cache (for PRs)
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        cache-read-only: ${{ inputs.cache-read-only == 'true' }}
+        validate-wrappers: true

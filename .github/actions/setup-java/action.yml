@@ -1,0 +1,21 @@
+name: Setup Java
+description: Install Temurin JDK 21
+
+inputs:
+  java-version:
+    description: JDK version
+    required: false
+    default: '21'
+  distribution:
+    description: JDK distribution
+    required: false
+    default: 'temurin'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v5
+      with:
+        distribution: ${{ inputs.distribution }}
+        java-version: ${{ inputs.java-version }}

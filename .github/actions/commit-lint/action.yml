@@ -1,0 +1,28 @@
+name: Commit Lint
+description: Validate commit messages match folder: note
+
+inputs:
+  pattern:
+    description: Regex for commit subject
+    required: false
+    default: '^[a-zA-Z0-9._-]+: .+'
+
+runs:
+  using: composite
+  steps:
+    - name: Lint commits
+      shell: bash
+      env:
+        PATTERN: ${{ inputs.pattern }}
+      run: |
+        fail=0
+        while IFS= read -r msg; do
+          case "$msg" in
+            Merge*|Revert*|fixup*|squash*) continue ;;
+          esac
+          if ! echo "$msg" | grep -qE "$PATTERN"; then
+            echo "::error::bad commit message: $msg"
+            fail=1
+          fi
+        done < <(git log --format=%s "${{ github.event.before }}..HEAD" 2>/dev/null || git log --format=%s -1)
+        exit $fail

@@ -1,0 +1,28 @@
+name: Gradle Build
+description: Run gradle with consistent flags and log capture
+
+inputs:
+  task:
+    description: Gradle task
+    required: true
+  log-file:
+    description: Log output path
+    required: false
+    default: 'build.log'
+  max-workers:
+    description: Max worker count
+    required: false
+    default: '1'
+
+runs:
+  using: composite
+  steps:
+    - name: Run gradle
+      shell: bash -o pipefail {0}
+      run: |
+        ./gradlew ${{ inputs.task }} \
+          --no-daemon \
+          --no-parallel \
+          --no-configuration-cache \
+          --max-workers=${{ inputs.max-workers }} \
+          --stacktrace 2>&1 | tee ${{ inputs.log-file }}

@@ -1,0 +1,31 @@
+name: Setup Android SDK
+description: Install Android SDK, NDK, platforms, build-tools
+
+inputs:
+  ndk-version:
+    description: NDK version
+    required: false
+    default: '27.1.12297006'
+  platform:
+    description: Android platform
+    required: false
+    default: 'android-35'
+  build-tools:
+    description: Build tools version
+    required: false
+    default: '35.0.0'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Android SDK
+      shell: bash
+      run: |
+        SDKMANAGER=$(find $ANDROID_SDK_ROOT/cmdline-tools -name sdkmanager -type f | head -1)
+        echo "$(dirname $SDKMANAGER)" >> $GITHUB_PATH
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        export PATH="$(dirname $SDKMANAGER):$PATH"
+        yes | $SDKMANAGER --licenses > /dev/null 2>&1 || true
+        $SDKMANAGER --install "ndk;${{ inputs.ndk-version }}" \
+          "platforms;${{ inputs.platform }}" \
+          "build-tools;${{ inputs.build-tools }}" > /dev/null
