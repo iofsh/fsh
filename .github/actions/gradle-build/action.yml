@@ -24,5 +24,4 @@ runs:
           --no-daemon \
           --no-parallel \
           --no-configuration-cache \
-          --max-workers=${{ inputs.max-workers }} \
-          --stacktrace 2>&1 | tee ${{ inputs.log-file }}
+          --max-workers=${{ inputs.max-workers }} 2>&1 | tee ${{ inputs.log-file }}
