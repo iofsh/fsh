@@ -22,16 +22,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,21 +61,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import io.fsh.ui.screen.logs.LogsScreen
-import io.fsh.ui.screen.packages.PackagesScreen
-import io.fsh.ui.screen.performance.PerformanceScreen
-import io.fsh.ui.screen.processes.ProcessesScreen
-import io.fsh.ui.screen.services.ServicesScreen
-import io.fsh.ui.screen.settings.SettingsScreen
 import io.fsh.ui.screen.summary.SummaryScreen
-import io.fsh.ui.screen.terminal.TerminalScreen
 import kotlinx.coroutines.launch
 
 private val WIDE_THRESHOLD = 600.dp
 private val SIDEBAR_MIN = 72.dp
 private val SIDEBAR_MAX = 360.dp
 private val SIDEBAR_DEFAULT = 200.dp
-
 private val ICON_ONLY_BELOW = 100.dp
 private val STACKED_BELOW = 160.dp
 
@@ -132,34 +131,19 @@ private fun FshSidebar(nav: NavHostController, width: Dp) {
                 .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (width >= ICON_ONLY_BELOW) {
-                Text(
-                    text = "Fsh",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-            } else {
-                Text(
-                    text = "F",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-            }
+            Text(
+                text = if (width >= ICON_ONLY_BELOW) "Fsh" else "F",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
 
             Routes.entries.forEach { route ->
                 FshSidebarItem(
                     route = route,
                     selected = nav.currentRoute() == route.route,
                     width = width,
-                    onClick = {
-                        nav.navigate(route.route) {
-                            popUpTo(nav.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
+                    onClick = { nav.navigateTo(route.route) },
                 )
             }
         }
@@ -289,16 +273,20 @@ private fun FshDrawerItems(
             icon = { Icon(route.icon, contentDescription = null) },
             selected = nav.currentRoute() == route.route,
             onClick = {
-                nav.navigate(route.route) {
-                    popUpTo(nav.graph.startDestinationId) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                nav.navigateTo(route.route)
                 onNavigate()
             },
             colors = NavigationDrawerItemDefaults.colors(),
             modifier = Modifier.padding(horizontal = 12.dp),
         )
+    }
+}
+
+private fun NavHostController.navigateTo(route: String) {
+    navigate(route) {
+        popUpTo(graph.startDestinationId) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 
@@ -313,13 +301,47 @@ private fun FshGraph(
         modifier = Modifier.fillMaxSize(),
     ) {
         composable(Routes.SUMMARY.route) { SummaryScreen(onMenu = onMenu) }
-        composable(Routes.PERFORMANCE.route) { PerformanceScreen(onMenu = onMenu) }
-        composable(Routes.PROCESSES.route) { ProcessesScreen(onMenu = onMenu) }
-        composable(Routes.LOGS.route) { LogsScreen(onMenu = onMenu) }
-        composable(Routes.TERMINAL.route) { TerminalScreen(onMenu = onMenu) }
-        composable(Routes.SERVICES.route) { ServicesScreen(onMenu = onMenu) }
-        composable(Routes.PACKAGES.route) { PackagesScreen(onMenu = onMenu) }
-        composable(Routes.SETTINGS.route) { SettingsScreen(onMenu = onMenu) }
+        composable(Routes.PERFORMANCE.route) { PlaceholderScreen("Performance", onMenu) }
+        composable(Routes.PROCESSES.route) { PlaceholderScreen("Processes", onMenu) }
+        composable(Routes.LOGS.route) { PlaceholderScreen("Logs", onMenu) }
+        composable(Routes.TERMINAL.route) { PlaceholderScreen("Terminal", onMenu) }
+        composable(Routes.SERVICES.route) { PlaceholderScreen("Services", onMenu) }
+        composable(Routes.PACKAGES.route) { PlaceholderScreen("Packages", onMenu) }
+        composable(Routes.SETTINGS.route) { PlaceholderScreen("Settings", onMenu) }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlaceholderScreen(title: String, onMenu: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onMenu) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+            )
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "$title — coming soon.",
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
     }
 }
 
