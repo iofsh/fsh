@@ -4,7 +4,7 @@
 package io.fsh.data.repository
 
 import io.fsh.data.backend.BackendManager
-import io.fsh.service.ProcessInfo
+import io.fsh.shared.model.process.ProcessInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
