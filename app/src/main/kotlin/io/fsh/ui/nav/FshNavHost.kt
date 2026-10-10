@@ -5,6 +5,7 @@ package io.fsh.ui.nav
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,11 +35,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -55,19 +64,30 @@ import io.fsh.ui.screen.summary.SummaryScreen
 import io.fsh.ui.screen.terminal.TerminalScreen
 import kotlinx.coroutines.launch
 
-private val RAIL_WIDTH = 88.dp
 private val WIDE_THRESHOLD = 600.dp
+private val SIDEBAR_MIN = 72.dp
+private val SIDEBAR_MAX = 360.dp
+private val SIDEBAR_DEFAULT = 200.dp
+
+private val ICON_ONLY_BELOW = 100.dp
+private val STACKED_BELOW = 160.dp
 
 @Composable
 fun FshNavHost() {
     val nav = rememberNavController()
+    var sidebarWidthDp by rememberSaveable { mutableFloatStateOf(SIDEBAR_DEFAULT.value) }
+    val sidebarWidth = sidebarWidthDp.dp
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val wide = maxWidth >= WIDE_THRESHOLD
 
         if (wide) {
             Row(modifier = Modifier.fillMaxSize()) {
-                FshSidebar(nav = nav)
+                FshSidebar(nav = nav, width = sidebarWidth)
+                FshResizeHandle(
+                    currentWidth = sidebarWidth,
+                    onWidthChange = { sidebarWidthDp = it.value },
+                )
                 Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                     FshGraph(nav = nav, onMenu = {})
                 }
@@ -99,11 +119,9 @@ fun FshNavHost() {
 }
 
 @Composable
-private fun FshSidebar(nav: NavHostController) {
+private fun FshSidebar(nav: NavHostController, width: Dp) {
     Surface(
-        modifier = Modifier
-            .width(RAIL_WIDTH)
-            .fillMaxHeight(),
+        modifier = Modifier.width(width).fillMaxHeight(),
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 2.dp,
     ) {
@@ -114,17 +132,27 @@ private fun FshSidebar(nav: NavHostController) {
                 .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "Fsh",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
+            if (width >= ICON_ONLY_BELOW) {
+                Text(
+                    text = "Fsh",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+            } else {
+                Text(
+                    text = "F",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+            }
 
             Routes.entries.forEach { route ->
                 FshSidebarItem(
                     route = route,
                     selected = nav.currentRoute() == route.route,
+                    width = width,
                     onClick = {
                         nav.navigate(route.route) {
                             popUpTo(nav.graph.startDestinationId) { saveState = true }
@@ -142,38 +170,94 @@ private fun FshSidebar(nav: NavHostController) {
 private fun FshSidebarItem(
     route: Routes,
     selected: Boolean,
+    width: Dp,
     onClick: () -> Unit,
 ) {
-    val bg = if (selected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+    val bg = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    else Color.Transparent
+    val contentColor = if (selected) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.onSurfaceVariant
 
-    Column(
+    val iconOnly = width < ICON_ONLY_BELOW
+    val stacked = width < STACKED_BELOW
+
+    val itemModifier = Modifier
+        .padding(horizontal = 8.dp, vertical = 3.dp)
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(10.dp))
+        .background(bg)
+        .clickable(onClick = onClick)
+        .padding(vertical = 8.dp, horizontal = if (stacked) 4.dp else 12.dp)
+
+    if (stacked) {
+        Column(
+            modifier = itemModifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = route.icon,
+                contentDescription = route.label,
+                tint = contentColor,
+                modifier = Modifier.size(22.dp),
+            )
+            if (!iconOnly) {
+                Text(
+                    text = route.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = contentColor,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    } else {
+        Row(
+            modifier = itemModifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                imageVector = route.icon,
+                contentDescription = route.label,
+                tint = contentColor,
+                modifier = Modifier.size(20.dp),
+            )
+            Text(
+                text = route.label,
+                style = MaterialTheme.typography.labelLarge,
+                color = contentColor,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FshResizeHandle(
+    currentWidth: Dp,
+    onWidthChange: (Dp) -> Unit,
+) {
+    val density = LocalDensity.current
+    val currentWidthState = rememberUpdatedState(currentWidth)
+
+    Box(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(bg)
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+            .width(6.dp)
+            .fillMaxHeight()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, dragAmount ->
+                    change.consume()
+                    val deltaDp = with(density) { dragAmount.toDp() }
+                    val next = currentWidthState.value + deltaDp
+                    onWidthChange(next.coerceIn(SIDEBAR_MIN, SIDEBAR_MAX))
+                }
+            },
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            imageVector = route.icon,
-            contentDescription = route.label,
-            tint = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(22.dp),
-        )
-        Text(
-            text = route.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
         )
     }
 }
