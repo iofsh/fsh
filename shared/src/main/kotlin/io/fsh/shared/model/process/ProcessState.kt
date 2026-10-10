@@ -2,3 +2,11 @@
 // Copyright (C) 2026 Fsh contributors
 
 package io.fsh.shared.model.process
+
+enum class ProcessState {
+    RUNNING,
+    SLEEPING,
+    STOPPED,
+    ZOMBIE,
+    UNKNOWN,
+}
